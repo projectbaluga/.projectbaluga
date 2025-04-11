@@ -18,10 +18,10 @@ namespace projectbaluga
 
     public partial class MainWindow : Window
     {
-        private const string HotspotUrl = "http://10.0.0.1";
-        private const string PostLoginUrl = "http://bojex.computers/status";
-        private const string LockScreenUrl = "http://bojex.computers/login";
-        private const string AdminPassword = "amiralakbar";
+        private string HotspotUrl => Properties.Settings.Default.HotspotUrl;
+        private string PostLoginUrl => Properties.Settings.Default.PostLoginUrl;
+        private string LockScreenUrl => Properties.Settings.Default.LockScreenUrl;
+        private string adminPassword => Properties.Settings.Default.AdminPassword;
 
         private AppState currentState = AppState.Startup;
         private KeyboardHook keyboardHook;
@@ -35,7 +35,6 @@ namespace projectbaluga
             NetworkChange.NetworkAvailabilityChanged += NetworkAvailabilityChanged;
             NetworkChange.NetworkAddressChanged += NetworkAddressChanged;
         }
-
         private void UpdateKeyboardHookState()
         {
             if (currentState == AppState.LoggedIn)
@@ -52,7 +51,6 @@ namespace projectbaluga
                 }
             }
         }
-
         private void InitializeWebView2()
         {
             webView2.EnsureCoreWebView2Async(null).ContinueWith(t =>
@@ -73,7 +71,39 @@ namespace projectbaluga
             }, TaskScheduler.FromCurrentSynchronizationContext());
         }
 
+        private void OpenSettings()
+        {
+            var settingsWindow = new SettingsWindow
+            {
+                Owner = this
+            };
+
+            bool? result = settingsWindow.ShowDialog();
+
+            if (result == true)
+            {
+                Properties.Settings.Default.HotspotUrl = settingsWindow.HotspotUrl;
+                Properties.Settings.Default.PostLoginUrl = settingsWindow.PostLoginUrl;
+                Properties.Settings.Default.LockScreenUrl = settingsWindow.LockScreenUrl;
+                Properties.Settings.Default.AdminPassword = settingsWindow.AdminPassword;
+                Properties.Settings.Default.IsTopmost = settingsWindow.IsTopmost;
+
+                Properties.Settings.Default.Save();
+
+                MessageBox.Show("Settings have been saved!", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        private void SaveButton_Click(object sender, RoutedEventArgs e)
+        {
+            Properties.Settings.Default.Save();
+
+            this.DialogResult = true;
+            this.Close();
+        }
+
         private bool isUnlocking = false;
+
         public void Unlock()
         {
             if (isUnlocking) return;
@@ -82,28 +112,24 @@ namespace projectbaluga
             this.IsEnabled = false;
 
             var passwordDialog = new PasswordDialog
-            { 
-                Topmost = true
+            {
+                Owner = this,      
             };
 
-            bool? dialogResult = passwordDialog.ShowDialog();
+            bool? result = passwordDialog.ShowDialog();
 
-            if (dialogResult == true)
+            if (result == true && passwordDialog.Password == Properties.Settings.Default.AdminPassword)
             {
-                if (passwordDialog.Password == AdminPassword)
-                {
-                    Application.Current.Shutdown();
-                }
-                else
-                {
-                    MessageBox.Show("Incorrect password. Access denied.");
-                }
+                Application.Current.Shutdown();
+            }
+            else
+            {
+                 MessageBox.Show("Incorrect password.", "Access Denied", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
 
             this.IsEnabled = true;
             isUnlocking = false;
         }
-
         private void OnNavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
         {
             string currentUrl = webView2.CoreWebView2.Source;
@@ -115,7 +141,7 @@ namespace projectbaluga
                     currentState = AppState.Locked;
                     this.WindowState = WindowState.Maximized;
                     this.WindowStyle = WindowStyle.None;
-                    this.Topmost = true;
+                    Owner = this;
 
                     UpdateKeyboardHookState();
                 }
@@ -130,18 +156,15 @@ namespace projectbaluga
                 }
             }
         }
-
         private void OnContextMenuRequested(object sender, CoreWebView2ContextMenuRequestedEventArgs e)
         {
             e.Handled = true;
         }
-
         private void HandlePostLogin()
         {
             this.Topmost = false;
             AdjustWindowForPostLogin();
         }
-
         private void AdjustWindowForPostLogin()
         {
             keyboardHook?.StopHook();
@@ -163,7 +186,6 @@ namespace projectbaluga
                 myScrollViewer.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
             }
         }
-
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
             e.Cancel = true;
@@ -177,7 +199,6 @@ namespace projectbaluga
                 webView2.CoreWebView2.Navigate(LockScreenUrl);
             }
         }
-
         private bool IsInternetAvailable()
         {
             foreach (NetworkInterface ni in NetworkInterface.GetAllNetworkInterfaces())
@@ -193,7 +214,6 @@ namespace projectbaluga
             }
             return false;
         }
-
         private void NetworkAvailabilityChanged(object sender, NetworkAvailabilityEventArgs e)
         {
             Dispatcher.Invoke(() =>
@@ -208,7 +228,6 @@ namespace projectbaluga
                 }
             });
         }
-
         private void NetworkAddressChanged(object sender, EventArgs e)
         {
             Dispatcher.Invoke(() =>
@@ -217,7 +236,6 @@ namespace projectbaluga
             });
         }
     }
-
     public class KeyboardHook
     {
         [DllImport("user32.dll", SetLastError = true)]
@@ -316,7 +334,6 @@ namespace projectbaluga
 
             return false;
         }
-
         private void UnlockApplication()
         {
             Application.Current.Dispatcher.Invoke(() =>
@@ -324,7 +341,6 @@ namespace projectbaluga
                 (Application.Current.MainWindow as MainWindow)?.Unlock();
             });
         }
-
         private bool IsBlockedKey(uint vkCode)
         {
             return vkCode == VK_LWIN || vkCode == VK_RWIN || vkCode == VK_MENU ||

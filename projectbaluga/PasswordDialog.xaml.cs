@@ -17,7 +17,6 @@ namespace projectbaluga
 
         private void OkButton_Click(object sender, RoutedEventArgs e)
         {
-
             if (string.IsNullOrWhiteSpace(PasswordBox.Password))
             {
                 MessageBox.Show("Password cannot be empty.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -33,6 +32,19 @@ namespace projectbaluga
         {
             DialogResult = false;
             Close();
+        }
+
+        private void SettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (PasswordBox.Password == Properties.Settings.Default.AdminPassword)
+            {
+                var settingsWindow = new SettingsWindow();
+                settingsWindow.ShowDialog();
+            }
+            else
+            {
+                MessageBox.Show("Incorrect password. Access denied.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
     }
 }
