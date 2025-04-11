@@ -1,0 +1,20 @@
+﻿<Window x:Class="projectbaluga.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:wv="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        Title="ProjectBaluga"
+        ShowInTaskbar="False"
+        WindowState="Maximized" WindowStyle="None" ResizeMode="NoResize">
+    <Grid>
+        <!-- WebView2 Control to display web content -->
+        <wv:WebView2 Name="webView2" />
+        
+        <!-- Add Name to ScrollViewer -->
+        <ScrollViewer Name="MyScrollViewer" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto">
+            <!-- Content that may require vertical scrolling -->
+            <StackPanel>
+                <!-- Your content goes here -->
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Window>
