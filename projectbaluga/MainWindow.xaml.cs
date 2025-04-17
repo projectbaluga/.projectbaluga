@@ -6,6 +6,8 @@ using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Web.WebView2.Core;
 using System.Windows.Input;
+using System.Text;
+using System.Threading;
 
 namespace projectbaluga
 {
@@ -25,12 +27,15 @@ namespace projectbaluga
 
         private AppState currentState = AppState.Startup;
         private KeyboardHook keyboardHook;
+        private CancellationTokenSource shutdownCancellationToken;
+
         public MainWindow()
         {
             InitializeComponent();
             InitializeWebView2();
-
+            ShowDesktopIcons();
             UpdateKeyboardHookState();
+            DeviceManagerHelper.EnableAllMouseDevices();
 
             NetworkChange.NetworkAvailabilityChanged += NetworkAvailabilityChanged;
             NetworkChange.NetworkAddressChanged += NetworkAddressChanged;
@@ -71,11 +76,143 @@ namespace projectbaluga
             }, TaskScheduler.FromCurrentSynchronizationContext());
         }
 
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern IntPtr FindWindowEx(IntPtr hwndParent, IntPtr hwndChildAfter, string lpszClass, string lpszWindow);
+
+        [DllImport("user32.dll")]
+        private static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
+
+        private const int WM_COMMAND = 0x111;
+        private const int TOGGLE_DESKTOP_ICONS = 0x7402;
+        private void ShowDesktopIcons()
+        {
+            IntPtr progman = FindWindow("Progman", null);
+            IntPtr defView = FindWindowEx(progman, IntPtr.Zero, "SHELLDLL_DefView", null);
+
+            if (defView == IntPtr.Zero)
+            {
+                IntPtr workerW = FindWindowEx(IntPtr.Zero, IntPtr.Zero, "WorkerW", null);
+                while (workerW != IntPtr.Zero && defView == IntPtr.Zero)
+                {
+                    defView = FindWindowEx(workerW, IntPtr.Zero, "SHELLDLL_DefView", null);
+                    workerW = FindWindowEx(IntPtr.Zero, workerW, "WorkerW", null);
+                }
+            }
+
+            if (defView != IntPtr.Zero)
+            {
+                SendMessage(defView, WM_COMMAND, TOGGLE_DESKTOP_ICONS, 0);
+            }
+        }
+
+        public class DeviceManagerHelper
+        {
+            private const int DIGCF_PRESENT = 0x00000002;
+            private const int DIGCF_ALLCLASSES = 0x00000004;
+            private const int DICS_ENABLE = 1;
+            private const int DICS_FLAG_GLOBAL = 1;
+            private const int DIF_PROPERTYCHANGE = 0x12;
+
+            [StructLayout(LayoutKind.Sequential)]
+            public struct SP_DEVINFO_DATA
+            {
+                public int cbSize;
+                public Guid ClassGuid;
+                public int DevInst;
+                public IntPtr Reserved;
+            }
+
+            [StructLayout(LayoutKind.Sequential)]
+            public struct SP_CLASSINSTALL_HEADER
+            {
+                public int cbSize;
+                public int InstallFunction;
+            }
+
+            [StructLayout(LayoutKind.Sequential)]
+            public struct SP_PROPCHANGE_PARAMS
+            {
+                public SP_CLASSINSTALL_HEADER ClassInstallHeader;
+                public int StateChange;
+                public int Scope;
+                public int HwProfile;
+            }
+
+            [DllImport("setupapi.dll", CharSet = CharSet.Auto, SetLastError = true)]
+            public static extern IntPtr SetupDiGetClassDevs(
+                ref Guid ClassGuid,
+                [MarshalAs(UnmanagedType.LPTStr)] string Enumerator,
+                IntPtr hwndParent,
+                int Flags);
+
+            [DllImport("setupapi.dll", SetLastError = true)]
+            public static extern bool SetupDiEnumDeviceInfo(
+                IntPtr DeviceInfoSet,
+                int MemberIndex,
+                ref SP_DEVINFO_DATA DeviceInfoData);
+
+            [DllImport("setupapi.dll", SetLastError = true)]
+            public static extern bool SetupDiSetClassInstallParams(
+                IntPtr DeviceInfoSet,
+                ref SP_DEVINFO_DATA DeviceInfoData,
+                ref SP_PROPCHANGE_PARAMS ClassInstallParams,
+                int ClassInstallParamsSize);
+
+            [DllImport("setupapi.dll", SetLastError = true)]
+            public static extern bool SetupDiCallClassInstaller(
+                int InstallFunction,
+                IntPtr DeviceInfoSet,
+                ref SP_DEVINFO_DATA DeviceInfoData);
+
+            [DllImport("setupapi.dll", SetLastError = true)]
+            public static extern bool SetupDiDestroyDeviceInfoList(IntPtr DeviceInfoSet);
+
+            public static void EnableAllMouseDevices()
+            {
+                Guid mouseGuid = new Guid("{4D36E96F-E325-11CE-BFC1-08002BE10318}");
+
+                IntPtr deviceInfoSet = SetupDiGetClassDevs(
+                    ref mouseGuid,
+                    null,
+                    IntPtr.Zero,
+                    DIGCF_PRESENT);
+
+                if (deviceInfoSet == IntPtr.Zero)
+                    return;
+
+                int index = 0;
+                SP_DEVINFO_DATA deviceInfoData = new SP_DEVINFO_DATA();
+                deviceInfoData.cbSize = Marshal.SizeOf(deviceInfoData);
+
+                while (SetupDiEnumDeviceInfo(deviceInfoSet, index, ref deviceInfoData))
+                {
+                    SP_PROPCHANGE_PARAMS propChangeParams = new SP_PROPCHANGE_PARAMS();
+                    propChangeParams.ClassInstallHeader = new SP_CLASSINSTALL_HEADER
+                    {
+                        cbSize = Marshal.SizeOf(typeof(SP_CLASSINSTALL_HEADER)),
+                        InstallFunction = DIF_PROPERTYCHANGE
+                    };
+                    propChangeParams.StateChange = DICS_ENABLE;
+                    propChangeParams.Scope = DICS_FLAG_GLOBAL;
+                    propChangeParams.HwProfile = 0;
+
+                    SetupDiSetClassInstallParams(deviceInfoSet, ref deviceInfoData, ref propChangeParams, Marshal.SizeOf(propChangeParams));
+                    SetupDiCallClassInstaller(DIF_PROPERTYCHANGE, deviceInfoSet, ref deviceInfoData);
+
+                    index++;
+                }
+
+                SetupDiDestroyDeviceInfoList(deviceInfoSet);
+            }
+        }
         private void OpenSettings()
         {
             var settingsWindow = new SettingsWindow
             {
-                Owner = this
+                Topmost = true,
             };
 
             bool? result = settingsWindow.ShowDialog();
@@ -87,6 +224,8 @@ namespace projectbaluga
                 Properties.Settings.Default.LockScreenUrl = settingsWindow.LockScreenUrl;
                 Properties.Settings.Default.AdminPassword = settingsWindow.AdminPassword;
                 Properties.Settings.Default.IsTopmost = settingsWindow.IsTopmost;
+                Properties.Settings.Default.ShutdownTimeoutMinutes = settingsWindow.ShutdownTimeoutMinutes;
+                Properties.Settings.Default.EnableAutoShutdown = settingsWindow.AutoShutdownCheckBox.IsChecked == true;
 
                 Properties.Settings.Default.Save();
 
@@ -113,7 +252,7 @@ namespace projectbaluga
 
             var passwordDialog = new PasswordDialog
             {
-                Owner = this,      
+                Topmost = true,
             };
 
             bool? result = passwordDialog.ShowDialog();
@@ -121,15 +260,56 @@ namespace projectbaluga
             if (result == true && passwordDialog.Password == Properties.Settings.Default.AdminPassword)
             {
                 Application.Current.Shutdown();
+                CancelShutdownCountdown();
             }
             else
             {
-                 MessageBox.Show("Incorrect password.", "Access Denied", MessageBoxButton.OK, MessageBoxImage.Warning);
+                Close();
             }
 
             this.IsEnabled = true;
             isUnlocking = false;
         }
+
+        private void StartShutdownCountdown()
+        {
+            CancelShutdownCountdown();
+
+            shutdownCancellationToken = new CancellationTokenSource();
+            var token = shutdownCancellationToken.Token;
+
+            int timeout = Properties.Settings.Default.ShutdownTimeoutMinutes;
+
+            Task.Run(async () =>
+            {
+                try
+                {
+                    await Task.Delay(TimeSpan.FromMinutes(timeout), token);
+                    if (!token.IsCancellationRequested && Properties.Settings.Default.EnableAutoShutdown)
+                    {
+                        Dispatcher.Invoke(() =>
+                        {
+                            System.Diagnostics.Process.Start("shutdown", "/s /t 0");
+                        });
+                    }
+                }
+                catch (TaskCanceledException)
+                {
+                    // Shutdown was cancelled
+                }
+            }, token);
+        }
+
+        private void CancelShutdownCountdown()
+        {
+            if (shutdownCancellationToken != null)
+            {
+                shutdownCancellationToken.Cancel();
+                shutdownCancellationToken.Dispose();
+                shutdownCancellationToken = null;
+            }
+        }
+
         private void OnNavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
         {
             string currentUrl = webView2.CoreWebView2.Source;
@@ -141,9 +321,10 @@ namespace projectbaluga
                     currentState = AppState.Locked;
                     this.WindowState = WindowState.Maximized;
                     this.WindowStyle = WindowStyle.None;
-                    Owner = this;
+                    this.Topmost = true;
 
                     UpdateKeyboardHookState();
+                    StartShutdownCountdown();
                 }
             }
             else if (currentUrl.Contains(PostLoginUrl))
@@ -153,6 +334,7 @@ namespace projectbaluga
                     currentState = AppState.LoggedIn;
                     UpdateKeyboardHookState();
                     HandlePostLogin();
+                    CancelShutdownCountdown();
                 }
             }
         }
@@ -351,4 +533,5 @@ namespace projectbaluga
                    vkCode == VK_SPACE || vkCode == VK_CONTROL;
         }
     }
+
 }

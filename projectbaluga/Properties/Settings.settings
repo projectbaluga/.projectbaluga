@@ -1,7 +1,27 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="uri:settings" CurrentProfile="(Default)">
-  <Profiles>
-    <Profile Name="(Default)" />
-  </Profiles>
-  <Settings />
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="projectbaluga.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="HotspotUrl" Type="System.String" Scope="User">
+      <Value Profile="(Default)">http://10.0.0.1</Value>
+    </Setting>
+    <Setting Name="PostLoginUrl" Type="System.String" Scope="User">
+      <Value Profile="(Default)">http://bojex.computers/status</Value>
+    </Setting>
+    <Setting Name="LockScreenUrl" Type="System.String" Scope="User">
+      <Value Profile="(Default)">http://bojex.computers/login</Value>
+    </Setting>
+    <Setting Name="AdminPassword" Type="System.String" Scope="User">
+      <Value Profile="(Default)">amiralakbar</Value>
+    </Setting>
+    <Setting Name="IsTopmost" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="EnableAutoShutdown" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="ShutdownTimeoutMinutes" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">10</Value>
+    </Setting>
+  </Settings>
 </SettingsFile>

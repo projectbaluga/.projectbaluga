@@ -1,58 +1,69 @@
 ﻿<Window x:Class="projectbaluga.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Settings"
-        Height="600" Width="500"
+        Title="BOJEX"
+        Height="645" Width="500"
         WindowStartupLocation="CenterScreen"
-        WindowStyle="None" ResizeMode="NoResize"
-        Background="#FAFAFA">
+        WindowStyle="None" ResizeMode="NoResize" Icon="/favicon.ico" Background="#FFFAFAFA">
 
-    <Grid>
-        <!-- Main Content Area -->
-        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top" Width="376" Margin="0,65,0,0" Height="535">
-            <!-- Header Text -->
-            <TextBlock FontWeight="Bold" FontSize="16" Foreground="#333333" HorizontalAlignment="Center" Margin="0,0,0,15">
+    <Grid HorizontalAlignment="Left" Width="500">
+        <StackPanel HorizontalAlignment="Center" Width="350" Margin="0,0,0,-1">
+            <TextBlock FontWeight="Bold" FontSize="16" Foreground="#333333" HorizontalAlignment="Center" Margin="15,15,15,15">
                 Settings
             </TextBlock>
 
-            <!-- Hotspot URL Section -->
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,10">
                 <Label Content="Hotspot URL:" VerticalAlignment="Center" Width="120" Foreground="#333333" FontSize="14"/>
-                <TextBox Name="HotspotUrlBox" Width="235" Margin="0,0,0,10" Padding="10" FontSize="14" 
+                <TextBox Name="HotspotUrlBox" Width="200" Margin="0,0,0,10" Padding="10" FontSize="14" 
                          BorderBrush="#DDD" BorderThickness="1" Background="#F4F4F4"/>
             </StackPanel>
 
-            <!-- Post Login URL Section -->
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,10">
                 <Label Content="Post Login URL:" VerticalAlignment="Center" Width="120" Foreground="#333333" FontSize="14"/>
-                <TextBox Name="PostLoginUrlBox" Width="235" Margin="0,0,0,10" Padding="10" FontSize="14" 
+                <TextBox Name="PostLoginUrlBox" Width="200" Margin="0,0,0,10" Padding="10" FontSize="14" 
                          BorderBrush="#DDD" BorderThickness="1" Background="#F4F4F4"/>
             </StackPanel>
 
-            <!-- Lock Screen URL Section -->
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,10">
                 <Label Content="Lock Screen URL:" VerticalAlignment="Center" Width="120" Foreground="#333333" FontSize="14"/>
-                <TextBox Name="LockScreenUrlBox" Width="235" Margin="0,0,0,10" Padding="10" FontSize="14" 
+                <TextBox Name="LockScreenUrlBox" Width="200" Margin="0,0,0,10" Padding="10" FontSize="14" 
                          BorderBrush="#DDD" BorderThickness="1" Background="#F4F4F4"/>
             </StackPanel>
 
-            <!-- Admin Password Section -->
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,10">
-                <Label Content="Admin Password:" VerticalAlignment="Center" Width="120" Foreground="#333333" FontSize="14"/>
-                <PasswordBox Name="PasswordBox" Width="235" Margin="0,0,0,10" Padding="10" FontSize="14" 
-                             BorderBrush="#DDD" BorderThickness="1" Background="#F4F4F4"/>
+            <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="0,10">
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                    <Label Content="New Password:" VerticalAlignment="Center" Width="120" Foreground="#333333" FontSize="14"/>
+                    <PasswordBox Name="NewPasswordBox" Width="200" Padding="10" FontSize="14" 
+                                 BorderBrush="#DDD" BorderThickness="1" Background="#F4F4F4"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Confirm Password:" VerticalAlignment="Center" Width="120" Foreground="#333333" FontSize="14"/>
+                    <PasswordBox Name="ConfirmPasswordBox" Width="200" Padding="10" FontSize="14" 
+                                 BorderBrush="#DDD" BorderThickness="1" Background="#F4F4F4"/>
+                </StackPanel>
             </StackPanel>
 
-            <!-- Topmost Checkbox Section -->
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,10">
                 <CheckBox Name="TopmostCheckBox" VerticalAlignment="Center" Foreground="#333333" Content="Always on Top" FontSize="14"/>
             </StackPanel>
 
-            <!-- Save Button -->
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,10">
+                <Label Content="Shutdown Timeout (min):" VerticalAlignment="Center" Width="160" Foreground="#333333" FontSize="14"/>
+                <TextBox Name="ShutdownTimeoutBox" Width="60" Margin="0,0,0,10" Padding="5" FontSize="14"
+             BorderBrush="#DDD" BorderThickness="1" Background="#F4F4F4"/>
+            </StackPanel>
+
+            <StackPanel>
+                <CheckBox x:Name="AutoShutdownCheckBox"
+              Foreground="#333333"
+              Content="Auto Shutdown&#xD;&#xA;"
+              FontSize="14" Checked="AutoShutdownCheckBox_Checked" Height="18" Width="130" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,0,0"/>
+            </StackPanel>
+
             <Button Content="Save" HorizontalAlignment="Stretch"
                     Padding="15,10" FontSize="16" FontWeight="Bold" Click="SaveButton_Click"
-                    Height="50" Margin="0,20,0,10" Background="#FFEE0037" BorderBrush="Red">
-                <!-- Reuse the existing style from first code -->
+                    Height="50" Margin="0,30,0,10" Background="#FFEE0037" BorderBrush="Red">
                 <Button.Style>
                     <Style TargetType="Button">
                         <Setter Property="Background" Value="#6200EE"/>
@@ -80,8 +91,7 @@
                     </ControlTemplate>
                 </Button.Template>
             </Button>
-
-            <!-- Footer Text -->
         </StackPanel>
+
     </Grid>
 </Window>

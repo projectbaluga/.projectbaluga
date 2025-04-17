@@ -13,13 +13,14 @@ namespace projectbaluga
             this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             this.WindowStyle = WindowStyle.SingleBorderWindow;
             this.ResizeMode = ResizeMode.NoResize;
+            this.Topmost = true;
         }
 
         private void OkButton_Click(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(PasswordBox.Password))
+            if (PasswordBox.Password != Properties.Settings.Default.AdminPassword)
             {
-                MessageBox.Show("Password cannot be empty.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Incorrect password. Access denied.", "Warning", MessageBoxButton.OK, MessageBoxImage.Hand);
                 return;
             }
 
@@ -27,6 +28,7 @@ namespace projectbaluga
             DialogResult = true;
             Close();
         }
+
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
@@ -36,6 +38,7 @@ namespace projectbaluga
 
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
         {
+
             if (PasswordBox.Password == Properties.Settings.Default.AdminPassword)
             {
                 var settingsWindow = new SettingsWindow();
@@ -43,7 +46,7 @@ namespace projectbaluga
             }
             else
             {
-                MessageBox.Show("Incorrect password. Access denied.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Incorrect password. Access denied.", "Warning", MessageBoxButton.OK, MessageBoxImage.Hand);
             }
         }
     }
