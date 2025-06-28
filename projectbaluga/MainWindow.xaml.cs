@@ -28,6 +28,7 @@ namespace projectbaluga
         private AppState currentState = AppState.Startup;
         private KeyboardHook keyboardHook;
         private CancellationTokenSource shutdownCancellationToken;
+        private bool allowWindowClose = false;
 
         public MainWindow()
         {
@@ -259,6 +260,7 @@ namespace projectbaluga
 
             if (result == true && passwordDialog.Password == Properties.Settings.Default.AdminPassword)
             {
+                allowWindowClose = true;
                 Application.Current.Shutdown();
                 CancelShutdownCountdown();
             }
@@ -370,7 +372,13 @@ namespace projectbaluga
         }
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
-            e.Cancel = true;
+            if (!allowWindowClose)
+            {
+                e.Cancel = true;
+                return;
+            }
+
+            base.OnClosing(e);
         }
         private void CheckInternetConnectionInstantly()
         {
