@@ -19,33 +19,5 @@
             </StackPanel>
         </ScrollViewer>
 
-        <!-- Fallback overlay shown when no network connection is available -->
-        <Grid x:Name="FallbackGrid" Background="Black" Visibility="Collapsed">
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                <TextBlock Text="No network connection"
-                           Foreground="White"
-                           FontSize="32"
-                           FontWeight="Bold"
-                           TextAlignment="Center"
-                           Margin="0,0,0,10"/>
-                <TextBlock x:Name="FallbackMessage"
-                           Foreground="White"
-                           FontSize="16"
-                           TextAlignment="Center"
-                           TextWrapping="Wrap"
-                           Margin="0,0,0,20">
-                    Please check your LAN cable or Wi-Fi settings. If the problem persists, contact the BOJEX TEAM.
-                </TextBlock>
-                <TextBlock x:Name="StatusText"
-                           Foreground="White"
-                           FontSize="14"
-                           TextAlignment="Center"
-                           Margin="0,0,0,20"/>
-                <Button Content="Retry"
-                        Width="100"
-                        HorizontalAlignment="Center"
-                        Click="RetryConnectivity_Click"/>
-            </StackPanel>
-        </Grid>
     </Grid>
 </Window>
