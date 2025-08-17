@@ -187,12 +187,8 @@ namespace projectbaluga
 
             if (result == true && projectbaluga.Security.PasswordStore.VerifyPassword(passwordDialog.Password))
             {
-                Application.Current.Shutdown();
                 CancelShutdownCountdown();
-            }
-            else
-            {
-                Close();
+                OpenSettings();
             }
 
             this.IsEnabled = true;
