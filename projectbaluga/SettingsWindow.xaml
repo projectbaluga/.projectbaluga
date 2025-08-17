@@ -58,7 +58,7 @@
                 <CheckBox x:Name="AutoShutdownCheckBox"
               Foreground="#333333"
               Content="Auto Shutdown&#xD;&#xA;"
-              FontSize="14" Checked="AutoShutdownCheckBox_Checked" Height="18" Width="130" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,0,0"/>
+              FontSize="14" Checked="AutoShutdownCheckBox_Checked" Unchecked="AutoShutdownCheckBox_Checked" Height="18" Width="130" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,0,0"/>
             </StackPanel>
 
             <Button Content="Save" HorizontalAlignment="Stretch"

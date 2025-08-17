@@ -26,6 +26,8 @@ namespace projectbaluga
             TopmostCheckBox.IsChecked = Properties.Settings.Default.IsTopmost;
             ShutdownTimeoutBox.Text = Properties.Settings.Default.ShutdownTimeoutMinutes.ToString();
             AutoShutdownCheckBox.IsChecked = Properties.Settings.Default.EnableAutoShutdown;
+            // Initialize the shutdown timeout box state based on the auto-shutdown setting
+            ShutdownTimeoutBox.IsEnabled = AutoShutdownCheckBox.IsChecked == true;
 
         }
 
@@ -84,7 +86,8 @@ namespace projectbaluga
 
         private void AutoShutdownCheckBox_Checked(object sender, RoutedEventArgs e)
         {
-
+            // Enable the timeout box only when auto shutdown is enabled
+            ShutdownTimeoutBox.IsEnabled = AutoShutdownCheckBox.IsChecked == true;
         }
         public int ShutdownTimeoutMinutes
         {
