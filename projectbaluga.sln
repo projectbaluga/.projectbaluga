@@ -5,16 +5,21 @@ VisualStudioVersion = 17.11.35327.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "projectbaluga", "projectbaluga\projectbaluga.csproj", "{F096F8D6-7EEB-4B6A-A644-9F8D25BAC195}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Watchdog", "Watchdog\Watchdog.csproj", "{FD021BDF-812D-4B06-8BEC-D5453E3E912C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{F096F8D6-7EEB-4B6A-A644-9F8D25BAC195}.Debug|Any CPU.ActiveCfg = Release|Any CPU
-		{F096F8D6-7EEB-4B6A-A644-9F8D25BAC195}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F096F8D6-7EEB-4B6A-A644-9F8D25BAC195}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
+        GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                {F096F8D6-7EEB-4B6A-A644-9F8D25BAC195}.Debug|Any CPU.ActiveCfg = Release|Any CPU
+                {F096F8D6-7EEB-4B6A-A644-9F8D25BAC195}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                {F096F8D6-7EEB-4B6A-A644-9F8D25BAC195}.Release|Any CPU.Build.0 = Release|Any CPU
+                {FD021BDF-812D-4B06-8BEC-D5453E3E912C}.Debug|Any CPU.ActiveCfg = Release|Any CPU
+                {FD021BDF-812D-4B06-8BEC-D5453E3E912C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                {FD021BDF-812D-4B06-8BEC-D5453E3E912C}.Release|Any CPU.Build.0 = Release|Any CPU
+        EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection

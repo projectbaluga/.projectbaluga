@@ -11,9 +11,6 @@
     <Setting Name="LockScreenUrl" Type="System.String" Scope="User">
       <Value Profile="(Default)">http://bojex.computers/login</Value>
     </Setting>
-    <Setting Name="AdminPassword" Type="System.String" Scope="User">
-      <Value Profile="(Default)">amiralakbar</Value>
-    </Setting>
     <Setting Name="IsTopmost" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>

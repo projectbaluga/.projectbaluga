@@ -9,7 +9,6 @@ namespace projectbaluga
         public string HotspotUrl => HotspotUrlBox.Text;
         public string PostLoginUrl => PostLoginUrlBox.Text;
         public string LockScreenUrl => LockScreenUrlBox.Text;
-        public string AdminPassword => NewPasswordBox.Password;
         public bool IsTopmost => TopmostCheckBox.IsChecked ?? false;
         public bool EnableAutoShutdown => AutoShutdownCheckBox.IsChecked ?? false;
 
@@ -28,8 +27,6 @@ namespace projectbaluga
             ShutdownTimeoutBox.Text = Properties.Settings.Default.ShutdownTimeoutMinutes.ToString();
             AutoShutdownCheckBox.IsChecked = Properties.Settings.Default.EnableAutoShutdown;
 
-            NewPasswordBox.Password = Properties.Settings.Default.AdminPassword;
-            ConfirmPasswordBox.Password = Properties.Settings.Default.AdminPassword;
         }
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
@@ -42,15 +39,19 @@ namespace projectbaluga
                 return;
             }
 
-            if (!Uri.TryCreate(HotspotUrlBox.Text, UriKind.Absolute, out _) ||
-                !Uri.TryCreate(PostLoginUrlBox.Text, UriKind.Absolute, out _) ||
-                !Uri.TryCreate(LockScreenUrlBox.Text, UriKind.Absolute, out _))
+            if (!Uri.TryCreate(HotspotUrlBox.Text, UriKind.Absolute, out var hotUri) ||
+                (hotUri.Scheme != Uri.UriSchemeHttp && hotUri.Scheme != Uri.UriSchemeHttps) ||
+                !Uri.TryCreate(PostLoginUrlBox.Text, UriKind.Absolute, out var postUri) ||
+                (postUri.Scheme != Uri.UriSchemeHttp && postUri.Scheme != Uri.UriSchemeHttps) ||
+                !Uri.TryCreate(LockScreenUrlBox.Text, UriKind.Absolute, out var lockUri) ||
+                (lockUri.Scheme != Uri.UriSchemeHttp && lockUri.Scheme != Uri.UriSchemeHttps))
             {
-                MessageBox.Show("Please enter valid URLs.");
+                MessageBox.Show("Please enter valid HTTP or HTTPS URLs.");
                 return;
             }
 
-            if (NewPasswordBox.Password != ConfirmPasswordBox.Password)
+            if ((!string.IsNullOrEmpty(NewPasswordBox.Password) || !string.IsNullOrEmpty(ConfirmPasswordBox.Password)) &&
+                NewPasswordBox.Password != ConfirmPasswordBox.Password)
             {
                 MessageBox.Show("Passwords do not match. Please re-enter.");
                 return;
@@ -65,13 +66,15 @@ namespace projectbaluga
             Properties.Settings.Default.HotspotUrl = HotspotUrlBox.Text;
             Properties.Settings.Default.PostLoginUrl = PostLoginUrlBox.Text;
             Properties.Settings.Default.LockScreenUrl = LockScreenUrlBox.Text;
-            Properties.Settings.Default.AdminPassword = NewPasswordBox.Password;
             Properties.Settings.Default.IsTopmost = TopmostCheckBox.IsChecked ?? false;
             Properties.Settings.Default.ShutdownTimeoutMinutes = timeoutMinutes;
             Properties.Settings.Default.EnableAutoShutdown = AutoShutdownCheckBox.IsChecked == true;
-
-
             Properties.Settings.Default.Save();
+
+            if (!string.IsNullOrEmpty(NewPasswordBox.Password))
+            {
+                projectbaluga.Security.PasswordStore.SetPassword(NewPasswordBox.Password);
+            }
 
             MessageBox.Show("Settings have been saved!");
 
