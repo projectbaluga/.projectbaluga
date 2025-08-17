@@ -1,4 +1,4 @@
-﻿<Window x:Class="projectbaluga.MainWindow"
+<Window x:Class="projectbaluga.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:wv="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
@@ -8,13 +8,44 @@
     <Grid>
         <!-- WebView2 Control to display web content -->
         <wv:WebView2 Name="webView2" />
-        
+
         <!-- Add Name to ScrollViewer -->
-        <ScrollViewer Name="MyScrollViewer" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto">
+        <ScrollViewer Name="MyScrollViewer"
+                      HorizontalScrollBarVisibility="Hidden"
+                      VerticalScrollBarVisibility="Auto">
             <!-- Content that may require vertical scrolling -->
             <StackPanel>
                 <!-- Your content goes here -->
             </StackPanel>
         </ScrollViewer>
+
+        <!-- Fallback overlay shown when no network connection is available -->
+        <Grid x:Name="FallbackGrid" Background="Black" Visibility="Collapsed">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock Text="No network connection"
+                           Foreground="White"
+                           FontSize="32"
+                           FontWeight="Bold"
+                           TextAlignment="Center"
+                           Margin="0,0,0,10"/>
+                <TextBlock x:Name="FallbackMessage"
+                           Foreground="White"
+                           FontSize="16"
+                           TextAlignment="Center"
+                           TextWrapping="Wrap"
+                           Margin="0,0,0,20">
+                    Please check your LAN cable or Wi-Fi settings. If the problem persists, contact the BOJEX TEAM.
+                </TextBlock>
+                <TextBlock x:Name="StatusText"
+                           Foreground="White"
+                           FontSize="14"
+                           TextAlignment="Center"
+                           Margin="0,0,0,20"/>
+                <Button Content="Retry"
+                        Width="100"
+                        HorizontalAlignment="Center"
+                        Click="RetryConnectivity_Click"/>
+            </StackPanel>
+        </Grid>
     </Grid>
 </Window>
