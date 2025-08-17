@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
+using System.IO;
 using System.Windows;
 
 namespace projectbaluga
@@ -13,5 +9,18 @@ namespace projectbaluga
     /// </summary>
     public partial class App : Application
     {
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            var dependencyPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "projectbaluga.dll");
+            if (!File.Exists(dependencyPath))
+            {
+                MessageBox.Show("Required component missing: projectbaluga.dll. Application will exit.",
+                                "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                Shutdown();
+                return;
+            }
+
+            base.OnStartup(e);
+        }
     }
 }
