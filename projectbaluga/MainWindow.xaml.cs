@@ -26,6 +26,7 @@ namespace projectbaluga
         private string PostLoginUrl => Properties.Settings.Default.PostLoginUrl;
         private string LockScreenUrl => Properties.Settings.Default.LockScreenUrl;
         private HashSet<string> allowedHosts;
+        private FallbackWindow fallbackWindow;
 
         private AppState currentState = AppState.Startup;
         private KeyboardHook keyboardHook;
@@ -61,6 +62,7 @@ namespace projectbaluga
         {
             base.OnClosed(e);
             ProcessWatchdog.Stop();
+            fallbackWindow?.Close();
         }
 
         private void ValidateUrls()
@@ -335,17 +337,22 @@ namespace projectbaluga
 
         private void ShowFallback(bool show, string status = null)
         {
-            if (FallbackGrid != null)
+            if (show)
             {
-                FallbackGrid.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
-                if (show && StatusText != null)
+                if (fallbackWindow == null)
                 {
-                    StatusText.Text = status ?? string.Empty;
+                    fallbackWindow = new FallbackWindow();
+                    fallbackWindow.Owner = this;
+                    fallbackWindow.RetryRequested += RetryConnectivity_Click;
                 }
-                if (webView2 != null)
-                {
-                    webView2.Visibility = show ? Visibility.Collapsed : Visibility.Visible;
-                }
+                fallbackWindow.SetStatus(status);
+                fallbackWindow.Show();
+                this.Hide();
+            }
+            else
+            {
+                fallbackWindow?.Hide();
+                this.Show();
             }
         }
         private bool IsInternetAvailable()

@@ -1,0 +1,35 @@
+<Window x:Class="projectbaluga.FallbackWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Fallback"
+        ShowInTaskbar="False"
+        WindowState="Maximized" WindowStyle="None" ResizeMode="NoResize"
+        Background="Black">
+    <Grid>
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+            <TextBlock Text="No network connection"
+                       Foreground="White"
+                       FontSize="32"
+                       FontWeight="Bold"
+                       TextAlignment="Center"
+                       Margin="0,0,0,10"/>
+            <TextBlock x:Name="FallbackMessage"
+                       Foreground="White"
+                       FontSize="16"
+                       TextAlignment="Center"
+                       TextWrapping="Wrap"
+                       Margin="0,0,0,20">
+                Please check your LAN cable or Wi-Fi settings. If the problem persists, contact the BOJEX TEAM.
+            </TextBlock>
+            <TextBlock x:Name="StatusText"
+                       Foreground="White"
+                       FontSize="14"
+                       TextAlignment="Center"
+                       Margin="0,0,0,20"/>
+            <Button Content="Retry"
+                    Width="100"
+                    HorizontalAlignment="Center"
+                    Click="OnRetryClicked"/>
+        </StackPanel>
+    </Grid>
+</Window>
