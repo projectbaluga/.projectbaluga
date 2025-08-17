@@ -125,9 +125,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Helpers\DeviceManagerHelper.cs" />
-    <Compile Include="Helpers\KeyboardHook.cs" />
-    <Page Include="PasswordDialog.xaml">
+      <Compile Include="Helpers\DeviceManagerHelper.cs" />
+      <Compile Include="Helpers\KeyboardHook.cs" />
+      <Compile Include="Helpers\RegistryHelper.cs" />
+      <Page Include="PasswordDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>

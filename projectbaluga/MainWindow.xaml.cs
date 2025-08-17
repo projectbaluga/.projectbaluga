@@ -49,6 +49,7 @@ namespace projectbaluga
             ShowDesktopIcons();
             UpdateKeyboardHookState();
             DeviceManagerHelper.EnableAllMouseDevices();
+            RegistryHelper.SetActiveProbingDisabled(Properties.Settings.Default.DisableActiveProbing);
             ProcessWatchdog.Start(System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName);
 
             NetworkChange.NetworkAvailabilityChanged += NetworkAvailabilityChanged;
