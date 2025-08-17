@@ -193,7 +193,9 @@ namespace projectbaluga
             if (result == true && projectbaluga.Security.PasswordStore.VerifyPassword(passwordDialog.Password))
             {
                 CancelShutdownCountdown();
-                OpenSettings();
+                currentState = AppState.LoggedIn;
+                UpdateKeyboardHookState();
+                HandlePostLogin();
             }
 
             this.IsEnabled = true;
