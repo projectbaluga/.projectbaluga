@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using projectbaluga.Helpers;
 
 namespace projectbaluga
 {
@@ -11,6 +12,7 @@ namespace projectbaluga
         public string LockScreenUrl => LockScreenUrlBox.Text;
         public bool IsTopmost => TopmostCheckBox.IsChecked ?? false;
         public bool EnableAutoShutdown => AutoShutdownCheckBox.IsChecked ?? false;
+        public bool DisableActiveProbing => DisableActiveProbingCheckBox.IsChecked ?? false;
 
         public SettingsWindow()
         {
@@ -24,6 +26,7 @@ namespace projectbaluga
             PostLoginUrlBox.Text = Properties.Settings.Default.PostLoginUrl;
             LockScreenUrlBox.Text = Properties.Settings.Default.LockScreenUrl;
             TopmostCheckBox.IsChecked = Properties.Settings.Default.IsTopmost;
+            DisableActiveProbingCheckBox.IsChecked = Properties.Settings.Default.DisableActiveProbing;
             ShutdownTimeoutBox.Text = Properties.Settings.Default.ShutdownTimeoutMinutes.ToString();
             AutoShutdownCheckBox.IsChecked = Properties.Settings.Default.EnableAutoShutdown;
             // Initialize the shutdown timeout box state based on the auto-shutdown setting
@@ -69,9 +72,12 @@ namespace projectbaluga
             Properties.Settings.Default.PostLoginUrl = PostLoginUrlBox.Text;
             Properties.Settings.Default.LockScreenUrl = LockScreenUrlBox.Text;
             Properties.Settings.Default.IsTopmost = TopmostCheckBox.IsChecked ?? false;
+            Properties.Settings.Default.DisableActiveProbing = DisableActiveProbingCheckBox.IsChecked ?? false;
             Properties.Settings.Default.ShutdownTimeoutMinutes = timeoutMinutes;
             Properties.Settings.Default.EnableAutoShutdown = AutoShutdownCheckBox.IsChecked == true;
             Properties.Settings.Default.Save();
+
+            RegistryHelper.SetActiveProbingDisabled(DisableActiveProbingCheckBox.IsChecked == true);
 
             if (!string.IsNullOrEmpty(NewPasswordBox.Password))
             {
