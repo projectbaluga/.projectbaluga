@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Linq;
 using Microsoft.Web.WebView2.Core;
 using ProjectBaluga.Watchdog;
 using projectbaluga.Helpers;
@@ -115,6 +116,9 @@ namespace projectbaluga
                     webView2.CoreWebView2.NavigationCompleted += OnNavigationCompleted;
                     webView2.CoreWebView2.ContextMenuRequested += OnContextMenuRequested;
                     webView2.CoreWebView2.NavigationStarting += OnNavigationStarting;
+
+                    // If the machine starts without network connectivity, show the fallback UI
+                    CheckInternetConnectionInstantly();
                 });
 
             }, TaskScheduler.FromCurrentSynchronizationContext());
@@ -315,7 +319,27 @@ namespace projectbaluga
 
             if (!isConnected)
             {
-                webView2.CoreWebView2.Navigate(LockScreenUrl);
+                ShowFallback(true, GetNetworkStatusMessage());
+                if (webView2?.CoreWebView2 != null)
+                {
+                    webView2.CoreWebView2.Navigate(LockScreenUrl);
+                }
+            }
+            else
+            {
+                ShowFallback(false);
+            }
+        }
+
+        private void ShowFallback(bool show, string status = null)
+        {
+            if (FallbackGrid != null)
+            {
+                FallbackGrid.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
+                if (show && StatusText != null)
+                {
+                    StatusText.Text = status ?? string.Empty;
+                }
             }
         }
         private bool IsInternetAvailable()
@@ -333,19 +357,61 @@ namespace projectbaluga
             }
             return false;
         }
+
+        private string GetNetworkStatusMessage()
+        {
+            var interfaces = NetworkInterface.GetAllNetworkInterfaces()
+                .Where(ni => ni.OperationalStatus == OperationalStatus.Up)
+                .ToList();
+            if (interfaces.Count > 0)
+            {
+                var ni = interfaces[0];
+                var ip = ni.GetIPProperties().UnicastAddresses.FirstOrDefault()?.Address?.ToString();
+                if (!string.IsNullOrEmpty(ip))
+                {
+                    return $"{ni.Name} - {ip}";
+                }
+                return ni.Name;
+            }
+            return "No active network interfaces detected.";
+        }
         private void NetworkAvailabilityChanged(object sender, NetworkAvailabilityEventArgs e)
         {
             Dispatcher.Invoke(() =>
             {
                 if (!e.IsAvailable)
                 {
-                    webView2.CoreWebView2.Navigate(LockScreenUrl);
+                    ShowFallback(true, GetNetworkStatusMessage());
+                    if (webView2?.CoreWebView2 != null)
+                    {
+                        webView2.CoreWebView2.Navigate(LockScreenUrl);
+                    }
                 }
                 else
                 {
-                    CheckInternetConnectionInstantly();
+                    ShowFallback(false);
+                    if (IsInternetAvailable() && webView2?.CoreWebView2 != null)
+                    {
+                        webView2.CoreWebView2.Navigate(HotspotUrl);
+                    }
                 }
             });
+        }
+
+        private void RetryConnectivity_Click(object sender, RoutedEventArgs e)
+        {
+            if (IsInternetAvailable())
+            {
+                ShowFallback(false);
+                if (webView2?.CoreWebView2 != null)
+                {
+                    webView2.CoreWebView2.Navigate(HotspotUrl);
+                }
+            }
+            else
+            {
+                ShowFallback(true, GetNetworkStatusMessage());
+            }
         }
         private void NetworkAddressChanged(object sender, EventArgs e)
         {
