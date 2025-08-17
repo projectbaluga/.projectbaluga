@@ -11,6 +11,7 @@ namespace projectbaluga
         private static int failedAttempts = 0;
         private static DateTime lockoutEnd = DateTime.MinValue;
         private static readonly string logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "projectbaluga", "unlock.log");
+        private const long MaxLogSizeBytes = 1 * 1024 * 1024; // 1 MB
 
         public PasswordDialog()
         {
@@ -84,6 +85,24 @@ namespace projectbaluga
             {
                 Directory.CreateDirectory(dir);
             }
+
+            try
+            {
+                if (File.Exists(logPath) && new FileInfo(logPath).Length > MaxLogSizeBytes)
+                {
+                    var archivePath = logPath + ".1";
+                    if (File.Exists(archivePath))
+                    {
+                        File.Delete(archivePath);
+                    }
+                    File.Move(logPath, archivePath);
+                }
+            }
+            catch (IOException)
+            {
+                // Ignore rotation failures
+            }
+
             File.AppendAllText(logPath, $"{DateTime.Now:u} - {(success ? "Success" : "Fail")}{Environment.NewLine}");
         }
     }
