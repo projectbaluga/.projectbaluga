@@ -342,6 +342,10 @@ namespace projectbaluga
                 {
                     StatusText.Text = status ?? string.Empty;
                 }
+                if (webView2 != null)
+                {
+                    webView2.Visibility = show ? Visibility.Collapsed : Visibility.Visible;
+                }
             }
         }
         private bool IsInternetAvailable()
