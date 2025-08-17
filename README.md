@@ -16,6 +16,10 @@
 2. Build the solution: `msbuild projectbaluga.sln` (or `dotnet build` with the appropriate SDK).
 3. Run `projectbaluga.exe`; `projectbaluga.dll` must reside alongside the executable.
 
+### Initial Password
+
+On first run the application looks for an environment variable named `PROJECTBALUGA_INITIAL_PASSWORD`. If present, its value is used as the initial administrator password and stored securely. When the variable is absent the application will prompt for a password and require one to be set before continuing.
+
 ## Repository Layout
 
 - `projectbaluga/` – WPF application source.

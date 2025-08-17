@@ -9,6 +9,7 @@ namespace projectbaluga.Security
     {
         private static readonly string StorePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "projectbaluga", "admin.pass");
+        private const string InitialPasswordEnvVar = "PROJECTBALUGA_INITIAL_PASSWORD";
         private const int SaltSize = 16;
         private const int HashSize = 32;
         private const int Iterations = 100000;
@@ -20,9 +21,15 @@ namespace projectbaluga.Security
                 Directory.CreateDirectory(dir);
             if (!File.Exists(StorePath))
             {
-                SetPassword("amiralakbar");
+                var initialPassword = Environment.GetEnvironmentVariable(InitialPasswordEnvVar);
+                if (!string.IsNullOrWhiteSpace(initialPassword))
+                {
+                    SetPassword(initialPassword);
+                }
             }
         }
+
+        public static bool IsPasswordSet => File.Exists(StorePath);
 
         public static void SetPassword(string password)
         {

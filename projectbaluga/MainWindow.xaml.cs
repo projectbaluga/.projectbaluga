@@ -34,6 +34,17 @@ namespace projectbaluga
         public MainWindow()
         {
             InitializeComponent();
+            if (!Security.PasswordStore.IsPasswordSet)
+            {
+                MessageBox.Show("No admin password found. Please set a password to continue.", "Security", MessageBoxButton.OK, MessageBoxImage.Warning);
+                var settingsWindow = new SettingsWindow();
+                settingsWindow.ShowDialog();
+                if (!Security.PasswordStore.IsPasswordSet)
+                {
+                    Application.Current.Shutdown();
+                    return;
+                }
+            }
             ValidateUrls();
             InitializeWebView2();
             ShowDesktopIcons();
