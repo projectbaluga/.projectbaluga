@@ -24,7 +24,7 @@
                 this["HotspotUrl"] = value;
             }
         }
-        
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("http://bojex.computers/status")]
@@ -36,7 +36,7 @@
                 this["PostLoginUrl"] = value;
             }
         }
-        
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("http://bojex.computers/login")]
@@ -46,18 +46,6 @@
             }
             set {
                 this["LockScreenUrl"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("amiralakbar")]
-        public string AdminPassword {
-            get {
-                return ((string)(this["AdminPassword"]));
-            }
-            set {
-                this["AdminPassword"] = value;
             }
         }
         

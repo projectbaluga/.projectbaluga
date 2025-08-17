@@ -8,6 +8,8 @@ using Microsoft.Web.WebView2.Core;
 using System.Windows.Input;
 using System.Text;
 using System.Threading;
+using System.Collections.Generic;
+using ProjectBaluga.Watchdog;
 
 namespace projectbaluga
 {
@@ -23,7 +25,7 @@ namespace projectbaluga
         private string HotspotUrl => Properties.Settings.Default.HotspotUrl;
         private string PostLoginUrl => Properties.Settings.Default.PostLoginUrl;
         private string LockScreenUrl => Properties.Settings.Default.LockScreenUrl;
-        private string adminPassword => Properties.Settings.Default.AdminPassword;
+        private HashSet<string> allowedHosts;
 
         private AppState currentState = AppState.Startup;
         private KeyboardHook keyboardHook;
@@ -32,13 +34,38 @@ namespace projectbaluga
         public MainWindow()
         {
             InitializeComponent();
+            ValidateUrls();
             InitializeWebView2();
             ShowDesktopIcons();
             UpdateKeyboardHookState();
             DeviceManagerHelper.EnableAllMouseDevices();
+            ProcessWatchdog.Start(System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName);
 
             NetworkChange.NetworkAvailabilityChanged += NetworkAvailabilityChanged;
             NetworkChange.NetworkAddressChanged += NetworkAddressChanged;
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+            ProcessWatchdog.Stop();
+        }
+
+        private void ValidateUrls()
+        {
+            var urls = new[] { HotspotUrl, PostLoginUrl, LockScreenUrl };
+            allowedHosts = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var url in urls)
+            {
+                if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) ||
+                    (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+                {
+                    MessageBox.Show($"Invalid URL or unsupported scheme: {url}", "Configuration Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    Application.Current.Shutdown();
+                    return;
+                }
+                allowedHosts.Add(uri.Host);
+            }
         }
         private void UpdateKeyboardHookState()
         {
@@ -68,9 +95,15 @@ namespace projectbaluga
 
                 Dispatcher.Invoke(() =>
                 {
+                    var settings = webView2.CoreWebView2.Settings;
+                    settings.AreDefaultContextMenusEnabled = false;
+                    settings.IsPasswordAutosaveEnabled = false;
+                    settings.AreDevToolsEnabled = false;
+
                     webView2.CoreWebView2.Navigate(HotspotUrl);
                     webView2.CoreWebView2.NavigationCompleted += OnNavigationCompleted;
                     webView2.CoreWebView2.ContextMenuRequested += OnContextMenuRequested;
+                    webView2.CoreWebView2.NavigationStarting += OnNavigationStarting;
                 });
 
             }, TaskScheduler.FromCurrentSynchronizationContext());
@@ -215,22 +248,7 @@ namespace projectbaluga
                 Topmost = true,
             };
 
-            bool? result = settingsWindow.ShowDialog();
-
-            if (result == true)
-            {
-                Properties.Settings.Default.HotspotUrl = settingsWindow.HotspotUrl;
-                Properties.Settings.Default.PostLoginUrl = settingsWindow.PostLoginUrl;
-                Properties.Settings.Default.LockScreenUrl = settingsWindow.LockScreenUrl;
-                Properties.Settings.Default.AdminPassword = settingsWindow.AdminPassword;
-                Properties.Settings.Default.IsTopmost = settingsWindow.IsTopmost;
-                Properties.Settings.Default.ShutdownTimeoutMinutes = settingsWindow.ShutdownTimeoutMinutes;
-                Properties.Settings.Default.EnableAutoShutdown = settingsWindow.AutoShutdownCheckBox.IsChecked == true;
-
-                Properties.Settings.Default.Save();
-
-                MessageBox.Show("Settings have been saved!", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
+            settingsWindow.ShowDialog();
         }
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
@@ -257,7 +275,7 @@ namespace projectbaluga
 
             bool? result = passwordDialog.ShowDialog();
 
-            if (result == true && passwordDialog.Password == Properties.Settings.Default.AdminPassword)
+            if (result == true && projectbaluga.Security.PasswordStore.VerifyPassword(passwordDialog.Password))
             {
                 Application.Current.Shutdown();
                 CancelShutdownCountdown();
@@ -313,8 +331,10 @@ namespace projectbaluga
         private void OnNavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
         {
             string currentUrl = webView2.CoreWebView2.Source;
+            Uri currentUri;
+            if (!Uri.TryCreate(currentUrl, UriKind.Absolute, out currentUri)) return;
 
-            if (currentUrl.Contains(LockScreenUrl))
+            if (Uri.Compare(currentUri, new Uri(LockScreenUrl), UriComponents.SchemeAndServer | UriComponents.Path, UriFormat.UriEscaped, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 if (currentState != AppState.Locked)
                 {
@@ -327,7 +347,7 @@ namespace projectbaluga
                     StartShutdownCountdown();
                 }
             }
-            else if (currentUrl.Contains(PostLoginUrl))
+            else if (Uri.Compare(currentUri, new Uri(PostLoginUrl), UriComponents.SchemeAndServer | UriComponents.Path, UriFormat.UriEscaped, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 if (currentState != AppState.LoggedIn)
                 {
@@ -336,6 +356,16 @@ namespace projectbaluga
                     HandlePostLogin();
                     CancelShutdownCountdown();
                 }
+            }
+        }
+
+        private void OnNavigationStarting(object sender, CoreWebView2NavigationStartingEventArgs e)
+        {
+            if (!Uri.TryCreate(e.Uri, UriKind.Absolute, out var uri) ||
+                (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps) ||
+                !allowedHosts.Contains(uri.Host))
+            {
+                e.Cancel = true;
             }
         }
         private void OnContextMenuRequested(object sender, CoreWebView2ContextMenuRequestedEventArgs e)
