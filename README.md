@@ -14,7 +14,27 @@
 
 1. Install the .NET Framework 4.7.2 developer pack and the WebView2 runtime.
 2. Build the solution: `msbuild projectbaluga.sln` (or `dotnet build` with the appropriate SDK).
-3. Run `projectbaluga.exe`; `projectbaluga.dll` must reside alongside the executable.
+3. Run `projectbaluga.exe`; copy `projectbaluga.dll` from the `Watchdog` project into the same directory so the watchdog can attach.
+
+## Deployment
+
+To deploy the application as a kiosk:
+
+1. Build the solution and copy `projectbaluga.exe` together with `projectbaluga.dll` to the target machine.
+2. Configure Windows to launch the executable at logon or replace `explorer.exe` as the shell. For example:
+
+   ```powershell
+   reg add "HKLM\Software\Microsoft\Windows NT\CurrentVersion\Winlogon" /v Shell /t REG_SZ /d "C:\\path\\to\\projectbaluga.exe" /f
+   ```
+
+3. For additional resilience, host the watchdog as a Windows service. Create or use a small service host that references `projectbaluga.dll` and registers `ProcessWatchdog.Start`, then install it:
+
+   ```powershell
+   sc create ProjectBalugaWatchdog binPath= "C:\\path\\to\\WatchdogService.exe" start= auto
+   sc start ProjectBalugaWatchdog
+   ```
+
+   The service monitors the main kiosk process and forces a shutdown if it exits unexpectedly.
 
 ### Initial Password
 

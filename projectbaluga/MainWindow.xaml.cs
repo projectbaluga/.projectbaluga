@@ -168,14 +168,6 @@ namespace projectbaluga
             settingsWindow.ShowDialog();
         }
 
-        private void SaveButton_Click(object sender, RoutedEventArgs e)
-        {
-            Properties.Settings.Default.Save();
-
-            this.DialogResult = true;
-            this.Close();
-        }
-
         private bool isUnlocking = false;
 
         public void Unlock()
